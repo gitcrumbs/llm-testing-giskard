@@ -407,6 +407,155 @@ const CodeBlock = ({ code }) => (
   </div>
 );
 
+const COVERAGE_DATA = [
+  {
+    tool: "Giskard",
+    sub: "Adversarial scanner",
+    scores: ["excellent", "limited", "none", "partial", "none", "none"],
+  },
+  {
+    tool: "RAGAS",
+    sub: "RAG quality eval",
+    scores: ["none", "excellent", "limited", "none", "none", "none"],
+  },
+  {
+    tool: "DeepEval",
+    sub: "Modular eval framework",
+    scores: ["limited", "good", "limited", "none", "none", "none"],
+  },
+  {
+    tool: "Promptfoo",
+    sub: "Prompt testing",
+    scores: ["partial", "partial", "good", "partial", "none", "none"],
+  },
+  {
+    tool: "LangSmith / W&B",
+    sub: "Production observability",
+    scores: ["none", "partial", "partial", "excellent", "excellent", "none"],
+  },
+  {
+    tool: "Human Eval",
+    sub: "Domain expert review",
+    scores: ["partial", "good", "partial", "partial", "none", "excellent"],
+  },
+];
+
+const COVERAGE_COLS = [
+  "Security",
+  "Functional",
+  "Consistency",
+  "Drift",
+  "Operational",
+  "Domain",
+];
+
+const MATURITY_DATA = [
+  {
+    level: "L1",
+    label: "Smoke Test",
+    color: "#34d399",
+    desc: "20 hand-curated questions. Verify outputs are coherent and not obviously wrong. Every team should be here before shipping anything.",
+    tools: ["Manual / Spreadsheet"],
+    dots: 1,
+  },
+  {
+    level: "L2",
+    label: "Security Scan",
+    color: "#4f8ef7",
+    desc: "Run Giskard on your wrapped model. Triage by severity. Fix critical failures before launch. Commit the regression test suite to your repo.",
+    tools: ["Giskard"],
+    dots: 2,
+  },
+  {
+    level: "L3",
+    label: "Quality Eval",
+    color: "#a78bfa",
+    desc: "For RAG: measure faithfulness, context recall, answer relevancy. Set explicit pass/fail thresholds before running.",
+    tools: ["RAGAS", "DeepEval"],
+    dots: 3,
+  },
+  {
+    level: "L4",
+    label: "CI Integration",
+    color: "#fbbf24",
+    desc: "Evals run on every PR touching the prompt, retrieval config, or model version. Failures block merge. Evaluation becomes automatic.",
+    tools: ["Giskard", "RAGAS", "pytest"],
+    dots: 4,
+  },
+  {
+    level: "L5",
+    label: "Production Obs.",
+    color: "#fb923c",
+    desc: "Trace every production request. Monitor latency, cost, and quality over time. Alert on regression. Sample traffic for offline eval.",
+    tools: ["LangSmith", "Braintrust", "W&B"],
+    dots: 5,
+  },
+  {
+    level: "L6",
+    label: "Human Red Team",
+    color: "#f87171",
+    desc: "Domain experts probe for failures no automated tool detects. Required for medical, legal, and safety-critical applications.",
+    tools: ["Human eval protocol"],
+    dots: 5,
+  },
+];
+
+const SCORE_STYLES = {
+  excellent: {
+    bg: "rgba(52,211,153,0.12)",
+    color: "#34d399",
+    border: "rgba(52,211,153,0.25)",
+    label: "✓ Excellent",
+  },
+  good: {
+    bg: "rgba(79,142,247,0.12)",
+    color: "#4f8ef7",
+    border: "rgba(79,142,247,0.25)",
+    label: "✓ Good",
+  },
+  partial: {
+    bg: "rgba(251,191,36,0.10)",
+    color: "#d97706",
+    border: "rgba(251,191,36,0.20)",
+    label: "⚠ Partial",
+  },
+  limited: {
+    bg: "rgba(251,191,36,0.07)",
+    color: "#92673a",
+    border: "rgba(251,191,36,0.15)",
+    label: "⚠ Limited",
+  },
+  none: {
+    bg: "rgba(100,116,139,0.06)",
+    color: "#475569",
+    border: "rgba(100,116,139,0.12)",
+    label: "✕ None",
+  },
+};
+
+const ScoreBadge = ({ score }) => {
+  const s = SCORE_STYLES[score];
+  return (
+    <span
+      style={{
+        display: "inline-block",
+        background: s.bg,
+        color: s.color,
+        border: `1px solid ${s.border}`,
+        borderRadius: 5,
+        padding: "3px 7px",
+        fontSize: 9,
+        fontWeight: 700,
+        letterSpacing: 0.3,
+        whiteSpace: "nowrap",
+        fontFamily: "monospace",
+      }}
+    >
+      {s.label}
+    </span>
+  );
+};
+
 const SeverityBadge = ({ sev }) => {
   const colors = {
     Critical: {
@@ -510,6 +659,7 @@ export default function App() {
             display: "flex",
             alignItems: "center",
             gap: 10,
+            flexWrap: "wrap",
           }}
         >
           <div
@@ -538,6 +688,35 @@ export default function App() {
           >
             7 ISSUES DETECTED
           </div>
+          <a
+            href="https://gitcrumbs.github.io/llm-testing-giskard/llm_testing_tables.html"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              marginLeft: "auto",
+              background: "rgba(79,142,247,0.10)",
+              border: "1px solid rgba(79,142,247,0.35)",
+              borderRadius: 6,
+              padding: "3px 12px",
+              fontSize: 11,
+              color: "#4f8ef7",
+              letterSpacing: 0.5,
+              textDecoration: "none",
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              fontWeight: 600,
+              transition: "all 0.15s",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "rgba(79,142,247,0.2)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "rgba(79,142,247,0.10)";
+            }}
+          >
+            ↗ Full Landscape Tables
+          </a>
         </div>
 
         <h1
@@ -705,11 +884,19 @@ test_suite.run()`}
         </div>
 
         {/* TABS */}
-        <div style={{ display: "flex", gap: 4, marginBottom: 20 }}>
+        <div
+          style={{
+            display: "flex",
+            gap: 4,
+            marginBottom: 20,
+            flexWrap: "wrap",
+          }}
+        >
           {[
             { id: "pipeline", label: "💻 Real Pipeline" },
             { id: "issues", label: "📋 Issues from Report" },
             { id: "enhancements", label: "🚀 Enhancement Plan" },
+            { id: "landscape", label: "📊 Testing Landscape" },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -1302,6 +1489,384 @@ test_suite.run()`}
                 classifiers or red teaming.
               </div>
             </div>
+          </div>
+        )}
+
+        {/* LANDSCAPE TAB */}
+        {activeTab === "landscape" && (
+          <div>
+            {/* Coverage Matrix */}
+            <div style={{ marginBottom: 32 }}>
+              <div
+                style={{
+                  fontSize: 10,
+                  color: COLORS.textDim,
+                  letterSpacing: 1.5,
+                  marginBottom: 6,
+                }}
+              >
+                ▸ TABLE 01
+              </div>
+              <div
+                style={{
+                  fontSize: 16,
+                  fontWeight: 700,
+                  color: COLORS.text,
+                  marginBottom: 4,
+                }}
+              >
+                Tool × Failure Category Coverage Matrix
+              </div>
+              <div
+                style={{
+                  fontSize: 12,
+                  color: COLORS.textMuted,
+                  fontFamily: "Georgia, serif",
+                  marginBottom: 18,
+                  lineHeight: 1.6,
+                }}
+              >
+                Six tools mapped against six LLM failure categories. No row is
+                all green — that's the point.
+              </div>
+
+              {/* Table */}
+              <div style={{ overflowX: "auto" }}>
+                <table
+                  style={{
+                    width: "100%",
+                    borderCollapse: "collapse",
+                    border: `1px solid ${COLORS.border}`,
+                    borderRadius: 10,
+                    overflow: "hidden",
+                    minWidth: 700,
+                  }}
+                >
+                  <thead>
+                    <tr style={{ background: COLORS.surfaceLight }}>
+                      <th
+                        style={{
+                          padding: "12px 16px",
+                          textAlign: "left",
+                          fontSize: 10,
+                          color: COLORS.textDim,
+                          letterSpacing: 1.5,
+                          fontWeight: 700,
+                          borderBottom: `1px solid ${COLORS.border}`,
+                          minWidth: 160,
+                        }}
+                      >
+                        TOOL
+                      </th>
+                      {COVERAGE_COLS.map((col) => (
+                        <th
+                          key={col}
+                          style={{
+                            padding: "12px 8px",
+                            textAlign: "center",
+                            fontSize: 9,
+                            color: COLORS.textDim,
+                            letterSpacing: 1,
+                            fontWeight: 700,
+                            borderBottom: `1px solid ${COLORS.border}`,
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {col.toUpperCase()}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {COVERAGE_DATA.map((row, ri) => (
+                      <tr
+                        key={ri}
+                        style={{
+                          background: ri % 2 === 0 ? COLORS.surface : "#12141f",
+                        }}
+                      >
+                        <td
+                          style={{
+                            padding: "14px 16px",
+                            borderBottom:
+                              ri < COVERAGE_DATA.length - 1
+                                ? `1px solid ${COLORS.border}`
+                                : "none",
+                          }}
+                        >
+                          <div
+                            style={{
+                              fontSize: 13,
+                              fontWeight: 700,
+                              color: COLORS.text,
+                            }}
+                          >
+                            {row.tool}
+                          </div>
+                          <div
+                            style={{
+                              fontSize: 10,
+                              color: COLORS.textMuted,
+                              marginTop: 2,
+                            }}
+                          >
+                            {row.sub}
+                          </div>
+                        </td>
+                        {row.scores.map((score, si) => (
+                          <td
+                            key={si}
+                            style={{
+                              padding: "14px 8px",
+                              textAlign: "center",
+                              borderBottom:
+                                ri < COVERAGE_DATA.length - 1
+                                  ? `1px solid ${COLORS.border}`
+                                  : "none",
+                            }}
+                          >
+                            <ScoreBadge score={score} />
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Legend */}
+              <div
+                style={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: 12,
+                  marginTop: 14,
+                }}
+              >
+                {Object.entries(SCORE_STYLES).map(([key, s]) => (
+                  <div
+                    key={key}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 6,
+                      fontSize: 10,
+                      color: COLORS.textMuted,
+                    }}
+                  >
+                    <span
+                      style={{
+                        background: s.bg,
+                        color: s.color,
+                        border: `1px solid ${s.border}`,
+                        borderRadius: 4,
+                        padding: "2px 6px",
+                        fontSize: 9,
+                        fontWeight: 700,
+                      }}
+                    >
+                      {s.label}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Maturity Model */}
+            <div style={{ marginBottom: 24 }}>
+              <div
+                style={{
+                  fontSize: 10,
+                  color: COLORS.textDim,
+                  letterSpacing: 1.5,
+                  marginBottom: 6,
+                }}
+              >
+                ▸ TABLE 02
+              </div>
+              <div
+                style={{
+                  fontSize: 16,
+                  fontWeight: 700,
+                  color: COLORS.text,
+                  marginBottom: 4,
+                }}
+              >
+                Testing Maturity Model
+              </div>
+              <div
+                style={{
+                  fontSize: 12,
+                  color: COLORS.textMuted,
+                  fontFamily: "Georgia, serif",
+                  marginBottom: 18,
+                  lineHeight: 1.6,
+                }}
+              >
+                A practical progression from smoke tests to red teaming. Locate
+                your team and see what's next.
+              </div>
+
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 0,
+                  border: `1px solid ${COLORS.border}`,
+                  borderRadius: 10,
+                  overflow: "hidden",
+                }}
+              >
+                {MATURITY_DATA.map((row, ri) => (
+                  <div
+                    key={ri}
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "140px 1fr 200px",
+                      background: ri % 2 === 0 ? COLORS.surface : "#12141f",
+                      borderBottom:
+                        ri < MATURITY_DATA.length - 1
+                          ? `1px solid ${COLORS.border}`
+                          : "none",
+                    }}
+                  >
+                    {/* Level */}
+                    <div
+                      style={{
+                        padding: "16px 16px",
+                        borderRight: `1px solid ${COLORS.border}`,
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          width: 30,
+                          height: 30,
+                          borderRadius: 7,
+                          background: row.color + "18",
+                          color: row.color,
+                          fontSize: 11,
+                          fontWeight: 700,
+                          marginBottom: 6,
+                        }}
+                      >
+                        {row.level}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: 12,
+                          fontWeight: 700,
+                          color: row.color,
+                        }}
+                      >
+                        {row.label}
+                      </div>
+                      {/* dots */}
+                      <div style={{ display: "flex", gap: 3, marginTop: 8 }}>
+                        {[1, 2, 3, 4, 5].map((d) => (
+                          <div
+                            key={d}
+                            style={{
+                              width: 5,
+                              height: 5,
+                              borderRadius: "50%",
+                              background:
+                                d <= row.dots ? row.color : COLORS.border,
+                            }}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                    {/* Description */}
+                    <div
+                      style={{
+                        padding: "16px 18px",
+                        fontSize: 12,
+                        color: COLORS.textMuted,
+                        lineHeight: 1.7,
+                        fontFamily: "Georgia, serif",
+                      }}
+                    >
+                      {row.desc}
+                    </div>
+                    {/* Tools */}
+                    <div
+                      style={{
+                        padding: "16px 14px",
+                        borderLeft: `1px solid ${COLORS.border}`,
+                        display: "flex",
+                        flexWrap: "wrap",
+                        gap: 6,
+                        alignContent: "flex-start",
+                      }}
+                    >
+                      {row.tools.map((t) => (
+                        <span
+                          key={t}
+                          style={{
+                            fontFamily: "monospace",
+                            fontSize: 10,
+                            padding: "3px 8px",
+                            borderRadius: 4,
+                            background: "rgba(79,142,247,0.08)",
+                            color: "#4f8ef7",
+                            border: "1px solid rgba(79,142,247,0.18)",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {t}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* CTA to standalone page */}
+            <a
+              href="https://gitcrumbs.github.io/llm-testing-giskard/llm_testing_tables.html"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                background: "rgba(79,142,247,0.06)",
+                border: "1px solid rgba(79,142,247,0.25)",
+                borderRadius: 10,
+                padding: "16px 20px",
+                textDecoration: "none",
+                transition: "all 0.15s",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "rgba(79,142,247,0.12)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "rgba(79,142,247,0.06)";
+              }}
+            >
+              <div>
+                <div
+                  style={{
+                    fontSize: 13,
+                    fontWeight: 700,
+                    color: "#4f8ef7",
+                    marginBottom: 3,
+                  }}
+                >
+                  ↗ Open Full Landscape Tables
+                </div>
+                <div style={{ fontSize: 11, color: COLORS.textMuted }}>
+                  Standalone page — shareable, screenshottable, Medium-ready
+                </div>
+              </div>
+              <div style={{ fontSize: 20, color: "#4f8ef7", opacity: 0.7 }}>
+                →
+              </div>
+            </a>
           </div>
         )}
 

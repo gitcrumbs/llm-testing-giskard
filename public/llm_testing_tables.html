@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LLM Testing Landscape — Comparison Tables</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Syne:wght@700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080c14;
+    --surface: #0f1520;
+    --surface2: #161e2e;
+    --border: #1e2d45;
+    --accent: #4f8ef7;
+    --accent2: #a78bfa;
+    --green: #34d399;
+    --yellow: #fbbf24;
+    --red: #f87171;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --dim: #334155;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    padding: 48px 32px 80px;
+    background-image:
+      radial-gradient(ellipse 80% 50% at 20% 0%, rgba(79,142,247,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 80% 100%, rgba(167,139,250,0.05) 0%, transparent 60%);
+  }
+
+  .page {
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+
+  /* ── Header ── */
+  .header {
+    margin-bottom: 60px;
+  }
+
+  .eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .eyebrow::before {
+    content: '';
+    display: block;
+    width: 24px;
+    height: 1px;
+    background: var(--accent);
+  }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(32px, 5vw, 52px);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -1px;
+    color: #f1f5f9;
+    margin-bottom: 16px;
+  }
+
+  h1 span {
+    color: transparent;
+    -webkit-text-stroke: 1px rgba(79,142,247,0.5);
+  }
+
+  .subtitle {
+    font-size: 15px;
+    color: var(--muted);
+    line-height: 1.6;
+    max-width: 560px;
+  }
+
+  /* ── Section labels ── */
+  .section {
+    margin-bottom: 56px;
+  }
+
+  .section-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2.5px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: #f1f5f9;
+    margin-bottom: 8px;
+  }
+
+  .section-desc {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 24px;
+    line-height: 1.6;
+  }
+
+  /* ── Coverage Matrix ── */
+  .coverage-table {
+    width: 100%;
+    border-collapse: collapse;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+
+  .coverage-table th {
+    background: var(--surface2);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 14px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .coverage-table th:not(:first-child) {
+    text-align: center;
+    font-size: 9px;
+    padding: 14px 8px;
+  }
+
+  .coverage-table td {
+    padding: 0;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+
+  .coverage-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  .coverage-table tr:hover .tool-cell {
+    background: rgba(79,142,247,0.04);
+  }
+
+  .tool-cell {
+    padding: 16px 16px;
+    background: var(--surface);
+    transition: background 0.2s;
+  }
+
+  .tool-name {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    font-weight: 600;
+    color: #e2e8f0;
+  }
+
+  .tool-sub {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  .score-cell {
+    text-align: center;
+    padding: 16px 8px;
+    background: var(--surface);
+    transition: background 0.2s;
+    position: relative;
+  }
+
+  .coverage-table tr:hover .score-cell {
+    background: rgba(79,142,247,0.04);
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    white-space: nowrap;
+    letter-spacing: 0.3px;
+  }
+
+  .badge.excellent {
+    background: rgba(52,211,153,0.12);
+    color: var(--green);
+    border: 1px solid rgba(52,211,153,0.25);
+  }
+
+  .badge.good {
+    background: rgba(79,142,247,0.12);
+    color: var(--accent);
+    border: 1px solid rgba(79,142,247,0.25);
+  }
+
+  .badge.partial {
+    background: rgba(251,191,36,0.10);
+    color: var(--yellow);
+    border: 1px solid rgba(251,191,36,0.20);
+  }
+
+  .badge.limited {
+    background: rgba(251,191,36,0.07);
+    color: #d97706;
+    border: 1px solid rgba(251,191,36,0.15);
+  }
+
+  .badge.none {
+    background: rgba(248,113,113,0.08);
+    color: #94a3b8;
+    border: 1px solid rgba(248,113,113,0.12);
+    opacity: 0.6;
+  }
+
+  /* ── Maturity Table ── */
+  .maturity-table {
+    width: 100%;
+    border-collapse: collapse;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+
+  .maturity-table th {
+    background: var(--surface2);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 14px 20px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .maturity-table td {
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    vertical-align: top;
+  }
+
+  .maturity-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  .maturity-table tr:hover td {
+    background: rgba(79,142,247,0.03);
+  }
+
+  .level-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+
+  .level-name {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+
+  .maturity-desc {
+    font-size: 13px;
+    color: #94a3b8;
+    line-height: 1.65;
+  }
+
+  .tools-pill-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 4px;
+  }
+
+  .tool-pill {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    padding: 3px 9px;
+    border-radius: 4px;
+    background: rgba(79,142,247,0.08);
+    color: var(--accent);
+    border: 1px solid rgba(79,142,247,0.18);
+    white-space: nowrap;
+  }
+
+  /* risk indicator */
+  .risk-bar {
+    display: flex;
+    gap: 3px;
+    margin-top: 8px;
+  }
+
+  .risk-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--border);
+  }
+
+  .risk-dot.active {
+    background: currentColor;
+  }
+
+  /* Legend */
+  .legend {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-top: 16px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  /* Footer */
+  .footer {
+    margin-top: 64px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: gap;
+    gap: 12px;
+  }
+
+  .footer-left {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--dim);
+    letter-spacing: 0.5px;
+  }
+
+  .footer-right {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--dim);
+  }
+
+  /* Animated entry */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .section { animation: fadeUp 0.5s ease both; }
+  .section:nth-child(2) { animation-delay: 0.1s; }
+  .section:nth-child(3) { animation-delay: 0.2s; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="eyebrow">LLM Testing Landscape</div>
+    <h1>No Single Tool<br><span>Covers Everything</span></h1>
+    <p class="subtitle">A coverage matrix and maturity model for teams building production LLM systems. Use alongside the full article.</p>
+  </div>
+
+  <!-- TABLE 1: Coverage Matrix -->
+  <div class="section">
+    <div class="section-label">Table 01</div>
+    <div class="section-title">Tool × Failure Category Coverage Matrix</div>
+    <div class="section-desc">Six tools mapped against six LLM failure categories. No row is all green — that's the point.</div>
+
+    <table class="coverage-table">
+      <thead>
+        <tr>
+          <th style="width:200px">Tool</th>
+          <th>Security</th>
+          <th>Functional</th>
+          <th>Consistency</th>
+          <th>Drift</th>
+          <th>Operational</th>
+          <th>Domain</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="tool-cell">
+            <div class="tool-name">Giskard</div>
+            <div class="tool-sub">Adversarial scanner</div>
+          </td>
+          <td class="score-cell"><span class="badge excellent">✓ Excellent</span></td>
+          <td class="score-cell"><span class="badge limited">⚠ Limited</span></td>
+          <td class="score-cell"><span class="badge none">✕ None</span></td>
+          <td class="score-cell"><span class="badge partial">⚠ Partial</span></td>
+          <td class="score-cell"><span class="badge none">✕ None</span></td>
+          <td class="score-cell"><span class="badge none">✕ None</span></td>
+        </tr>
+        <tr>
+          <td class="tool-cell">
+            <div class="tool-name">RAGAS</div>
+            <div class="tool-sub">RAG quality eval</div>
+          </td>
+          <td class="score-cell"><span class="badge none">✕ None</span></td>
+          <td class="score-cell"><span class="badge excellent">✓ Excellent</span></td>
+          <td class="score-cell"><span class="badge limited">⚠ Limited</span></td>
+          <td class="score-cell"><span class="badge none">✕ None</span></td>
+          <td class="score-cell"><span class="badge none">✕ None</span></td>
+          <td class="score-cell"><span class="badge none">✕ None</span></td>
+        </tr>
+        <tr>
+          <td class="tool-cell">
+            <div class="tool-name">DeepEval</div>
+            <div class="tool-sub">Modular eval framework</div>
+          </td>
+          <td class="score-cell"><span class="badge limited">⚠ Limited</span></td>
+          <td class="score-cell"><span class="badge good">✓ Good</span></td>
+          <td class="score-cell"><span class="badge limited">⚠ Limited</span></td>
+          <td class="score-cell"><span class="badge none">✕ None</span></td>
+          <td class="score-cell"><span class="badge none">✕ None</span></td>
+          <td class="score-cell"><span class="badge none">✕ None</span></td>
+        </tr>
+        <tr>
+          <td class="tool-cell">
+            <div class="tool-name">Promptfoo</div>
+            <div class="tool-sub">Prompt testing</div>
+          </td>
+          <td class="score-cell"><span class="badge partial">⚠ Partial</span></td>
+          <td class="score-cell"><span class="badge partial">⚠ Partial</span></td>
+          <td class="score-cell"><span class="badge good">✓ Good</span></td>
+          <td class="score-cell"><span class="badge partial">⚠ Partial</span></td>
+          <td class="score-cell"><span class="badge none">✕ None</span></td>
+          <td class="score-cell"><span class="badge none">✕ None</span></td>
+        </tr>
+        <tr>
+          <td class="tool-cell">
+            <div class="tool-name">LangSmith / W&B</div>
+            <div class="tool-sub">Production observability</div>
+          </td>
+          <td class="score-cell"><span class="badge none">✕ None</span></td>
+          <td class="score-cell"><span class="badge partial">⚠ Partial</span></td>
+          <td class="score-cell"><span class="badge partial">⚠ Partial</span></td>
+          <td class="score-cell"><span class="badge excellent">✓ Excellent</span></td>
+          <td class="score-cell"><span class="badge excellent">✓ Excellent</span></td>
+          <td class="score-cell"><span class="badge none">✕ None</span></td>
+        </tr>
+        <tr>
+          <td class="tool-cell">
+            <div class="tool-name">Human Eval</div>
+            <div class="tool-sub">Domain expert review</div>
+          </td>
+          <td class="score-cell"><span class="badge partial">⚠ Partial</span></td>
+          <td class="score-cell"><span class="badge good">✓ Good</span></td>
+          <td class="score-cell"><span class="badge partial">⚠ Partial</span></td>
+          <td class="score-cell"><span class="badge partial">⚠ Partial</span></td>
+          <td class="score-cell"><span class="badge none">✕ None</span></td>
+          <td class="score-cell"><span class="badge excellent">✓ Excellent</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="legend">
+      <div class="legend-item"><span class="badge excellent" style="font-size:9px">✓ Excellent</span> Best-in-class coverage</div>
+      <div class="legend-item"><span class="badge good" style="font-size:9px">✓ Good</span> Solid coverage</div>
+      <div class="legend-item"><span class="badge partial" style="font-size:9px">⚠ Partial</span> Some coverage, use with others</div>
+      <div class="legend-item"><span class="badge limited" style="font-size:9px">⚠ Limited</span> Minimal, don't rely on it</div>
+      <div class="legend-item"><span class="badge none" style="font-size:9px">✕ None</span> Not covered</div>
+    </div>
+  </div>
+
+  <!-- TABLE 2: Maturity Model -->
+  <div class="section">
+    <div class="section-label">Table 02</div>
+    <div class="section-title">Testing Maturity Model</div>
+    <div class="section-desc">A practical progression from smoke tests to red teaming. Locate your team and see what's next.</div>
+
+    <table class="maturity-table">
+      <thead>
+        <tr>
+          <th style="width:130px">Stage</th>
+          <th>What you do</th>
+          <th style="width:220px">Tooling</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <div class="level-badge" style="background:rgba(52,211,153,0.12);color:#34d399">L1</div>
+            <div class="level-name" style="color:#34d399">Smoke Test</div>
+            <div class="risk-bar" style="color:#34d399">
+              <div class="risk-dot active"></div>
+              <div class="risk-dot"></div>
+              <div class="risk-dot"></div>
+              <div class="risk-dot"></div>
+              <div class="risk-dot"></div>
+            </div>
+          </td>
+          <td>
+            <div class="maturity-desc">20 hand-curated questions. Verify outputs are coherent, on-topic, and not obviously wrong. Takes one afternoon. Every team should be here before shipping anything.</div>
+          </td>
+          <td>
+            <div class="tools-pill-wrap">
+              <span class="tool-pill" style="color:#64748b;background:rgba(100,116,139,0.08);border-color:rgba(100,116,139,0.15)">Manual / Spreadsheet</span>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <div class="level-badge" style="background:rgba(79,142,247,0.12);color:#4f8ef7">L2</div>
+            <div class="level-name" style="color:#4f8ef7">Security Scan</div>
+            <div class="risk-bar" style="color:#4f8ef7">
+              <div class="risk-dot active"></div>
+              <div class="risk-dot active"></div>
+              <div class="risk-dot"></div>
+              <div class="risk-dot"></div>
+              <div class="risk-dot"></div>
+            </div>
+          </td>
+          <td>
+            <div class="maturity-desc">Run Giskard on your wrapped model. Triage by severity. Fix critical failures before launch. Commit the generated regression test suite to your repo.</div>
+          </td>
+          <td>
+            <div class="tools-pill-wrap">
+              <span class="tool-pill">Giskard</span>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <div class="level-badge" style="background:rgba(167,139,250,0.12);color:#a78bfa">L3</div>
+            <div class="level-name" style="color:#a78bfa">Quality Eval</div>
+            <div class="risk-bar" style="color:#a78bfa">
+              <div class="risk-dot active"></div>
+              <div class="risk-dot active"></div>
+              <div class="risk-dot active"></div>
+              <div class="risk-dot"></div>
+              <div class="risk-dot"></div>
+            </div>
+          </td>
+          <td>
+            <div class="maturity-desc">For RAG: measure faithfulness, context recall, and answer relevancy. For non-RAG: answer correctness metrics. Set explicit pass/fail thresholds before running.</div>
+          </td>
+          <td>
+            <div class="tools-pill-wrap">
+              <span class="tool-pill">RAGAS</span>
+              <span class="tool-pill">DeepEval</span>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <div class="level-badge" style="background:rgba(251,191,36,0.10);color:#fbbf24">L4</div>
+            <div class="level-name" style="color:#fbbf24">CI Integration</div>
+            <div class="risk-bar" style="color:#fbbf24">
+              <div class="risk-dot active"></div>
+              <div class="risk-dot active"></div>
+              <div class="risk-dot active"></div>
+              <div class="risk-dot active"></div>
+              <div class="risk-dot"></div>
+            </div>
+          </td>
+          <td>
+            <div class="maturity-desc">Giskard test suite and RAGAS evals run on every pull request touching the prompt, retrieval config, or model version. Failures block merge. Evaluation becomes automatic.</div>
+          </td>
+          <td>
+            <div class="tools-pill-wrap">
+              <span class="tool-pill">Giskard</span>
+              <span class="tool-pill">RAGAS</span>
+              <span class="tool-pill">pytest</span>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <div class="level-badge" style="background:rgba(251,146,60,0.12);color:#fb923c">L5</div>
+            <div class="level-name" style="color:#fb923c">Production Obs.</div>
+            <div class="risk-bar" style="color:#fb923c">
+              <div class="risk-dot active"></div>
+              <div class="risk-dot active"></div>
+              <div class="risk-dot active"></div>
+              <div class="risk-dot active"></div>
+              <div class="risk-dot active"></div>
+            </div>
+          </td>
+          <td>
+            <div class="maturity-desc">Trace every production request. Monitor latency, cost, and output quality over time. Alert on regression. Sample production traffic for offline evaluation.</div>
+          </td>
+          <td>
+            <div class="tools-pill-wrap">
+              <span class="tool-pill">LangSmith</span>
+              <span class="tool-pill">Braintrust</span>
+              <span class="tool-pill">W&B</span>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <div class="level-badge" style="background:rgba(248,113,113,0.12);color:#f87171">L6</div>
+            <div class="level-name" style="color:#f87171">Human Red Team</div>
+            <div class="risk-bar" style="color:#f87171">
+              <div class="risk-dot active"></div>
+              <div class="risk-dot active"></div>
+              <div class="risk-dot active"></div>
+              <div class="risk-dot active"></div>
+              <div class="risk-dot active" style="background:#f87171"></div>
+            </div>
+          </td>
+          <td>
+            <div class="maturity-desc">Domain experts systematically probe for failures no automated tool detects. Required for medical, legal, and safety-critical applications. Run at every major model or prompt change.</div>
+          </td>
+          <td>
+            <div class="tools-pill-wrap">
+              <span class="tool-pill" style="color:#f87171;background:rgba(248,113,113,0.08);border-color:rgba(248,113,113,0.2)">Human eval protocol</span>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="footer">
+    <div class="footer-left">LLM Testing Landscape · gitcrumbs.github.io/llm-testing-giskard</div>
+    <div class="footer-right">2 tables · 6 tools · 6 failure categories · 6 maturity stages</div>
+  </div>
+
+</div>
+</body>
+</html>
